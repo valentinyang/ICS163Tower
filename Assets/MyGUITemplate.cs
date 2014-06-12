@@ -108,7 +108,7 @@ public class MyGUITemplate : MonoBehaviour
 		
 		//check camera
 		if (camera == null){
-			camera = new GameObject();
+			camera = GameObject.Find("Main Camera");
 		}
 	}
 	
@@ -143,9 +143,9 @@ public class MyGUITemplate : MonoBehaviour
 		
 		/* set the initial location */
 		/* TODO: This needs to be completed */
-		lastLat = 0;
-		lastLng = 0;
-		lastAlt = 0;
+		lastLat = myLocation.getLat();
+		lastLng = myLocation.getLng();
+		lastAlt = myLocation.getAlt();
 		
 		/* set initial leaders */
 		leaders = "";
@@ -166,6 +166,7 @@ public class MyGUITemplate : MonoBehaviour
 		Color color;
 		if (!ownerColors.TryGetValue (name, out color)) {
 			/* TODO: This needs to be completed (optional) */
+			ownerColors.Add(name, color = new Color(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f)));
 		}
 		return color;
 	}
@@ -313,7 +314,7 @@ public class MyGUITemplate : MonoBehaviour
 						
 						//If there is a tower, then create one
 						if(_tower.ToString().Equals ("true")){
-							Object thing = Instantiate(tower,new Vector3(indexX*stepXMeters,0.0f,indexY*stepYMeters),Quaternion.Euler(270,0,0));
+							Object thing = Instantiate(tower,new Vector3(indexX*stepXMeters,0.0f,indexY*stepYMeters),Quaternion.identity);
 							((GameObject)thing).transform.localScale = new Vector3(0.05f,0.05f,0.1f);
 							tempWorld.Add (thing);
 							Debug.Log("Got a tower"+indexX*stepXMeters+" "+alt+" "+indexY*stepYMeters);
@@ -321,7 +322,7 @@ public class MyGUITemplate : MonoBehaviour
 						
 						//If there is a bomb, then create one
 						if(_bomb.ToString().Equals ("true")){
-							Object thing = Instantiate(bomb,new Vector3(indexX*stepXMeters,0.0f,indexY*stepYMeters),Quaternion.identity);
+							Object thing = Instantiate(bomb,new Vector3(indexX*stepXMeters,0.0f,indexY*stepYMeters),Quaternion.Euler(270,0,0));
 							tempWorld.Add (thing);
 							Debug.Log("Got a bomb"+indexX*stepXMeters+" "+alt+" "+indexY*stepYMeters);
 							
@@ -340,8 +341,11 @@ public class MyGUITemplate : MonoBehaviour
 				}
 			}
 			else{
-				if(state.TryGetValue ("errors",out x)){
-					addDebug("refreshGameState error:"+x.ToString());
+				if(state.TryGetValue ("errors", out x)){
+					foreach(object y in (List<object>)x){
+						addDebug (y.ToString());
+					}
+					//addDebug("refreshGameState error:"+x.ToString());
 				}
 			}
 		}
@@ -355,6 +359,7 @@ public class MyGUITemplate : MonoBehaviour
 				if (state.TryGetValue ("errors", out x)) {
 					foreach(object y in (List<object>)x){
 						// TODO: Decide if you want to do anything with error messages: y.ToString()
+						addDebug(y.ToString());
 					}
 				}
 			}
@@ -376,7 +381,7 @@ public class MyGUITemplate : MonoBehaviour
 			}
 			else{
 				if (state.TryGetValue ("result", out x)) {
-					string z ="";
+					// string z ="";
 					foreach(KeyValuePair<string,object> y in (Dictionary<string,object>)x){
 						// TODO: Decide if you want to do anything with leader board // info messages: y.ToString()
 						// y.Key is the player
@@ -415,12 +420,9 @@ public class MyGUITemplate : MonoBehaviour
 		
 		//// Toggle
 		// Expand
-		
 		expandGUI = GUI.Toggle(new Rect(boxWidth, 0, boxWidth, boxHeight), expandGUI, "Expand");
 		
 		if (expandGUI) {
-			
-			
 			//// GUI.Label inside GUI.Box
 			// Current Location
 			GUI.Label (new Rect (0, boxHeight, Screen.width, boxHeight), "Current Location: (" + lastLat + ", " + lastLng + ", " + lastAlt + ")");
